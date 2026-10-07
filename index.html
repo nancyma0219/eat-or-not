@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Eat or Not?</title>
+        <link rel="icon" type="image/png" href="/logo.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --paper: #f6f1e7;
+                --card: #fffdf8;
+                --ink: #1d1b16;
+                --muted: #6b6457;
+                --line: #e2d9c6;
+                --blue: #1f4e9c;
+                --green: #2e7d4f;
+                --orange: #d9822b;
+                --red: #b3362c;
+            }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+                font-family: Inter, system-ui, sans-serif;
+                background: var(--paper);
+                color: var(--ink);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                padding: 2rem 1rem;
+            }
+            #app { width: 100%; max-width: 860px; display: flex; flex-direction: column; gap: 1.25rem; }
+
+            /* --- Header --- */
+            header { display: flex; gap: 1.25rem; align-items: center; }
+            .badge {
+                flex: none;
+                width: 84px; height: 84px;
+                border: 4px solid var(--blue);
+                border-radius: 12px;
+                background: #fff;
+                object-fit: contain;
+                padding: 4px;
+                transform: rotate(-4deg);
+                box-shadow: 4px 4px 0 var(--ink);
+            }
+            h1 { font-family: Fraunces, serif; font-weight: 800; font-size: 2.2rem; line-height: 1.05; }
+            header p { color: var(--muted); margin-top: 0.35rem; line-height: 1.45; }
+
+            /* --- Explainer strip --- */
+            .how { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+            .how div {
+                background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+                padding: 0.75rem 0.9rem; font-size: 0.85rem; line-height: 1.4;
+            }
+            .how b { display: block; font-size: 0.9rem; margin-bottom: 0.15rem; }
+
+            /* --- Legend --- */
+            .legend {
+                background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+                padding: 0.6rem 0.9rem; font-size: 0.85rem; line-height: 1.5;
+            }
+            .legend summary { cursor: pointer; font-weight: 600; }
+            .legend dl { margin-top: 0.6rem; display: grid; grid-template-columns: 11rem 1fr; gap: 0.5rem 1rem; }
+            .legend dt { font-weight: 600; }
+            .legend dd { color: var(--muted); }
+            @media (max-width: 640px) { .legend dl { grid-template-columns: 1fr; gap: 0.15rem; } .legend dd { margin-bottom: 0.5rem; } }
+
+            /* --- Chat --- */
+            #chat {
+                background: var(--card); border: 2px solid var(--ink); border-radius: 14px;
+                box-shadow: 6px 6px 0 var(--ink);
+                display: flex; flex-direction: column; overflow: hidden;
+            }
+            #messages {
+                padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
+                min-height: 380px; max-height: 62vh; overflow-y: auto;
+            }
+            .greeting { display: flex; gap: 0.75rem; align-items: flex-start; }
+            .avatar {
+                width: 44px; height: 44px; flex: none; border-radius: 50%; object-fit: cover;
+                border: 2px solid var(--ink);
+            }
+            .msg.bot { display: flex; gap: 0.75rem; align-items: flex-start; max-width: 100%; }
+            .msg.bot .content { flex: 1; min-width: 0; }
+            .greeting .text p + p { margin-top: 0.4rem; }
+            .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+            .chip {
+                border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+                border-radius: 999px; padding: 0.45rem 0.85rem; font: inherit; font-size: 0.85rem;
+                cursor: pointer;
+            }
+            .chip:hover { border-color: var(--blue); color: var(--blue); }
+
+            .msg { max-width: 85%; line-height: 1.55; }
+            .msg.user {
+                align-self: flex-end; background: var(--blue); color: #fff;
+                padding: 0.6rem 0.95rem; border-radius: 14px 14px 4px 14px;
+            }
+            .msg.bot { align-self: flex-start; }
+            .msg.bot .text ul, .msg.bot .text ol { margin: 0.4rem 0 0.4rem 1.3rem; }
+            .msg.bot .text li + li { margin-top: 0.2rem; }
+            .msg.bot .text h1, .msg.bot .text h2, .msg.bot .text h3 { font-size: 1rem; margin: 0.6rem 0 0.3rem; }
+            .msg.bot .text table {
+                border-collapse: collapse; margin: 0.6rem 0; font-size: 0.85rem; width: 100%;
+                display: block; overflow-x: auto;
+            }
+            .msg.bot .text th, .msg.bot .text td {
+                border: 1px solid var(--line); padding: 0.4rem 0.55rem; text-align: left; vertical-align: top;
+            }
+            .kao { white-space: nowrap; display: inline-block; }
+            .msg.bot .text td .kao { display: block; margin-top: 0.15rem; }
+            .msg.bot .text th { background: var(--paper); font-weight: 600; white-space: nowrap; }
+            .msg.bot .text tr:nth-child(even) td { background: #fbf8f1; }
+            .msg.bot .text p + p { margin-top: 0.5rem; }
+            .msg.loading .text { color: var(--muted); font-style: italic; }
+
+            /* --- Tool call cards: the inspector's log --- */
+            .log { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.6rem; }
+            .step {
+                border: 1px dashed var(--line); border-left: 4px solid var(--blue);
+                border-radius: 8px; padding: 0.55rem 0.75rem; background: #fbf8f1;
+                font-size: 0.85rem;
+            }
+            .step.err { border-left-color: var(--red); }
+            .step .head { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+            .step .title { font-weight: 600; }
+            .step code { word-break: break-all; font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; color: var(--muted); }
+            .step .body { margin-top: 0.45rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+            .step details { margin-top: 0.4rem; }
+            .step summary { cursor: pointer; color: var(--muted); font-size: 0.75rem; }
+            .step pre {
+                font-family: "IBM Plex Mono", monospace; font-size: 0.7rem; white-space: pre-wrap;
+                word-break: break-word; max-height: 220px; overflow: auto; margin-top: 0.3rem;
+                background: #fff; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--line);
+            }
+            .place {
+                display: flex; align-items: center; gap: 0.45rem; background: #fff;
+                border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.55rem;
+            }
+            .g {
+                width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center;
+                font-family: Fraunces, serif; font-weight: 800; color: #fff; background: var(--muted);
+                flex: none;
+            }
+            .g.A { background: var(--blue); } .g.B { background: var(--green); } .g.C { background: var(--orange); }
+            .place small { color: var(--muted); display: block; font-size: 0.72rem; }
+            button.place { font: inherit; color: inherit; text-align: left; cursor: pointer; }
+            button.place:hover { border-color: var(--blue); box-shadow: 2px 2px 0 var(--blue); }
+            .meter { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
+            .meter .bar { flex: 1; height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+            .meter .fill { height: 100%; border-radius: 99px; }
+            .tag { font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; }
+            .facts { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: stretch; width: 100%; }
+            .fact {
+                display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0.15rem;
+                background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.35rem 0.6rem;
+            }
+            .fact b { font-size: 0.95rem; }
+            .fact small { color: var(--muted); font-size: 0.72rem; }
+            .verdict {
+                align-self: center; color: #fff; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;
+                padding: 0.35rem 0.7rem; border-radius: 999px;
+            }
+            .ranked { display: flex; flex-direction: column; gap: 0.35rem; width: 100%; }
+            .rank-row {
+                display: flex; align-items: center; gap: 0.55rem; background: #fff;
+                border: 1px solid var(--line); border-radius: 8px; padding: 0.35rem 0.6rem;
+            }
+            .rank-row > div { flex: 1; min-width: 0; }
+            .rank-row small { display: block; color: var(--muted); font-size: 0.72rem; }
+            .note { width: 100%; font-size: 0.78rem; color: var(--muted); }
+            .warn { color: var(--orange) !important; }
+            .trend { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; }
+
+            /* --- Input --- */
+            #input-area { display: flex; gap: 0.75rem; padding: 1rem; border-top: 2px solid var(--ink); }
+            #user-input {
+                flex: 1; min-width: 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 10px;
+                font: inherit; background: #fff; outline: none;
+            }
+            #user-input:focus { border-color: var(--blue); }
+            button.primary {
+                padding: 0.7rem 1.2rem; background: var(--ink); color: #fff; border: none;
+                border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer;
+            }
+            button.primary:disabled { opacity: 0.35; }
+            footer { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); font-size: 0.78rem; }
+            footer button { white-space: nowrap; background: none; border: none; color: var(--blue); font: inherit; cursor: pointer; text-decoration: underline; }
+
+            @media (max-width: 640px) {
+                .how { grid-template-columns: 1fr 1fr; }
+                h1 { font-size: 1.7rem; }
+                .badge { width: 64px; height: 64px; }
+                .msg { max-width: 100%; }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <img class="badge" src="/logo.png" alt="Eat or Not? logo" />
+                <div>
+                    <h1>Eat or Not?</h1>
+                    <p>
+                        Before you order, ask me about any NYC restaurant. I read the city's
+                        health inspections and rodent reports, then check what diners say and what it costs.
+                    </p>
+                </div>
+            </header>
+
+            <section class="how">
+                <div><b>🔍 Find a place</b>Search by name, zipcode or cuisine and see its current letter grade.</div>
+                <div><b>📋 Read the record</b>Every recent inspection, score and violation, in plain English.</div>
+                <div><b>🐀 Rat risk</b>My own score mixing the restaurant's pest citations with rat findings on its block.</div>
+                <div><b>⚖️ Worth it?</b>Hygiene, Google rating and price side by side, with a verdict you can audit.</div>
+            </section>
+
+            <details class="legend">
+                <summary>📏 How to read the numbers</summary>
+                <dl>
+                    <dt>Violation points (hygiene)</dt>
+                    <dd>The city inspector adds points for each problem found, more for serious ones.
+                    <b>Lower is better:</b> A = 0–13, B = 14–27, C = 28+. "Critical" violations are the ones most
+                    likely to make someone sick.</dd>
+                    <dt>⚠️ Grade may be outdated</dt>
+                    <dd>A restaurant that scores 14+ on a first inspection isn't graded on the spot; it gets
+                    re-inspected weeks later. Until then the old grade stays in the window, so Meowchi flags it.</dd>
+                    <dt>Rat-risk points</dt>
+                    <dd>Meowchi's own score, <b>lower is better</b>: 0–2 low, 3–5 moderate, 6+ high. Points come from
+                    pest violations <i>inside</i> the restaurant (3 years) and city rodent inspections that found rats
+                    at <i>other buildings</i> within 150 m (1 year). Each card shows exactly which points came from where.</dd>
+                    <dt>Google rating and "adj"</dt>
+                    <dd>The adjusted rating pulls places with few reviews toward a typical 4.2, so a 5.0 from 6 reviews
+                    (adj 4.29) can't beat a 4.7 from 2,000 (adj 4.69).</dd>
+                    <dt>Verdicts</dt>
+                    <dd><b>GO</b>: clean and well-loved · <b>GO IF SPLURGING</b>: same, but $$ or more ·
+                    <b>TASTY BUT CHECK</b>: loved, but some inspection marks · <b>FINE</b>: nothing special either way ·
+                    <b>SKIP</b>: grade C, closed by the city in the last year, or weak reviews ·
+                    <b>NOT ENOUGH DATA</b>: rating or grade missing. Hygiene is never averaged with taste: a dirty
+                    kitchen is a SKIP however good the reviews.</dd>
+                    <dt>Ranking (comparisons)</dt>
+                    <dd>Sorted by verdict first (GO → GO IF SPLURGING → TASTY BUT CHECK → FINE → NOT ENOUGH DATA → SKIP),
+                    then by the review-adjusted rating, then by fewer violation points. The order is computed, not
+                    picked by taste.</dd>
+                </dl>
+            </details>
+
+            <main id="chat">
+                <div id="messages">
+                    <div class="msg bot greeting">
+                        <img class="avatar" src="/meowchi.jpg" alt="Meowchi" />
+                        <div class="text">
+                            <p><b>Hey~~~ I'm Meowchi!</b> <span class="kao">(˵◝ ⩊ ◜˵マ</span></p>
+                            <p>I'm a New Yorker and a full-time foodie. My favorite food is mochi 🍡, and I know
+                            this city's restaurants inside out.</p>
+                            <p>Enter a restaurant (or a question) and let meow help you decide: eat or not?</p>
+                            <div class="chips" id="starter-chips">
+                                <button class="chip">Is Lunar clean?</button>
+                                <button class="chip">Best dessert in SoHo?</button>
+                                <button class="chip">Has Joe's Pizza ever been shut down?</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="input-area">
+                    <input type="text" id="user-input" placeholder="Type a restaurant name or a question…" autocomplete="off" />
+                    <button class="primary" id="send-btn">Inspect</button>
+                </div>
+            </main>
+
+            <footer>
+                <span>Data: NYC DOHMH Restaurant &amp; Rodent Inspections (NYC Open Data), ratings and prices from Google Maps. Rat risk and verdicts are heuristics, not official ratings.</span>
+                <button id="new-chat">New chat</button>
+            </footer>
+        </div>
+
+        <script src="/static/marked.min.js"></script>
+        <script src="/static/purify.min.js"></script>
+        <script>
+            const messages = document.getElementById("messages");
+            const userInput = document.getElementById("user-input");
+            const sendBtn = document.getElementById("send-btn");
+            let sessionId = null;
+
+            const TOOL_LABELS = {
+                search_restaurants: ["🔍", "Searching restaurants"],
+                get_inspection_history: ["📋", "Pulling inspection history"],
+                rat_risk_report: ["🐀", "Running the rat risk report"],
+                worth_it_check: ["⚖️", "Weighing hygiene, rating and price"],
+                compare_restaurants: ["🏆", "Ranking the candidates"],
+            };
+            const VERDICT_COLORS = {
+                GO: "var(--green)", "GO IF SPLURGING": "var(--blue)", "TASTY BUT CHECK": "var(--orange)",
+                FINE: "var(--muted)", SKIP: "var(--red)", "NOT ENOUGH DATA": "var(--muted)",
+            };
+
+            function el(tag, cls, text) {
+                const e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text !== undefined) e.textContent = text;
+                return e;
+            }
+
+            function escapeHtml(s) {
+                return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+            }
+
+            // Full Markdown (tables, nested lists) via marked, sanitized by DOMPurify.
+            // Falls back to the tiny renderer below if the libraries didn't load.
+            function renderMarkdown(text) {
+                const html = window.marked && window.DOMPurify
+                    ? DOMPurify.sanitize(marked.parse(text || "", { breaks: true }))
+                    : renderSimple(text);
+                return wrapEmoticons(html);
+            }
+
+            // Meowchi's emoticons must never break across lines: wrap each one in a no-wrap span.
+            // (In table cells CSS also puts it on its own line under the verdict.)
+            const EMOTICONS = ["ദ്ദി(• ⩊ •マ", "/ᐠ - ˕ -マ", "/ᐠ ╥ ˕ ╥マ", "/ᐠ ·•᷄ ˕ •᷅マ", "(˵◝ ⩊ ◜˵マ", "/ᐠ｡ꞈ｡ᐟ\\"];
+            function wrapEmoticons(html) {
+                for (const e of EMOTICONS) html = html.split(e).join('<span class="kao">' + e + "</span>");
+                return html;
+            }
+
+            function renderSimple(text) {
+                const lines = escapeHtml(text || "").split("\n");
+                let html = "", inList = false;
+                for (let line of lines) {
+                    line = line.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+                    const bullet = line.match(/^\s*[-*•]\s+(.*)/);
+                    if (bullet) {
+                        if (!inList) { html += "<ul>"; inList = true; }
+                        html += "<li>" + bullet[1] + "</li>";
+                    } else {
+                        if (inList) { html += "</ul>"; inList = false; }
+                        if (line.trim()) html += "<p>" + line + "</p>";
+                    }
+                }
+                return html + (inList ? "</ul>" : "");
+            }
+
+            function gradeBox(grade) {
+                return el("span", "g " + (grade || ""), grade && "ABC".includes(grade) ? grade : "?");
+            }
+
+            // A friendly summary of each tool result, with the raw JSON one click away.
+            function renderStep(call) {
+                let data = {};
+                try { data = JSON.parse(call.result); } catch (e) {}
+                const [icon, label] = TOOL_LABELS[call.name] || ["🔧", call.name];
+                const step = el("div", "step" + (data.error ? " err" : ""));
+                const head = el("div", "head");
+                head.append(el("span", "title", icon + " " + label), el("code", "", call.name + "(" + JSON.stringify(call.args) + ")"));
+                step.append(head);
+
+                const body = el("div", "body");
+                if (data.error) {
+                    body.append(el("span", "", "⚠️ " + data.error));
+                } else if (call.name === "search_restaurants") {
+                    (data.restaurants || []).forEach((p, i) => {
+                        const box = el("button", "place pick");
+                        box.title = "Pick this one";
+                        const info = el("div");
+                        info.append(el("span", "", (i + 1) + ". " + p.name), el("small", "", p.address));
+                        if (p.heads_up) info.append(el("small", "warn", "⚠️ " + p.heads_up));
+                        box.append(gradeBox(p.grade), info);
+                        box.addEventListener("click", () => send("#" + (i + 1) + ": " + p.name + ", " + p.address + " (id " + p.id + ")"));
+                        body.append(box);
+                    });
+                    const more = data.total_matches > data.showing ? " of " + data.total_matches + " — tell me the borough or street to narrow it down" : "";
+                    body.append(el("div", "note", "Showing " + data.showing + more + ". Tap a card to pick it."));
+                } else if (call.name === "get_inspection_history") {
+                    const s = data.summary || {};
+                    body.append(
+                        el("span", "trend", "Violation points per inspection, newest first: " + (s.score_trend_newest_first || []).join(" → ")),
+                        el("div", "note", "Lower is better: A = 0–13, B = 14–27, C = 28+ · " + s.critical_violations_total +
+                            " critical violations · shut down by the city " + s.times_closed_by_health_dept + "×" +
+                            ((s.closure_dates || []).length ? " (" + s.closure_dates.join(", ") + ")" : "")),
+                    );
+                } else if (call.name === "rat_risk_report") {
+                    const color = { LOW: "var(--green)", MODERATE: "var(--orange)", HIGH: "var(--red)" }[data.risk_level];
+                    const meter = el("div", "meter");
+                    const bar = el("div", "bar");
+                    const fill = el("div", "fill");
+                    fill.style.width = Math.min(100, (data.risk_points / 9) * 100 + 6) + "%";
+                    fill.style.background = color;
+                    bar.append(fill);
+                    const tag = el("span", "tag", data.risk_level + " (" + data.risk_points + " pts)");
+                    tag.style.color = color;
+                    meter.append(bar, tag);
+                    body.append(meter, el("div", "note", "Meowchi's rat-risk points: 0–2 low, 3–5 moderate, 6+ high · " +
+                        "inside the shop: " + data.points_from_inside_the_restaurant + " pts · the surrounding block: " +
+                        data.points_from_the_surrounding_block + " pts"));
+                    for (const r of data.reasons || []) body.append(el("div", "note", "• " + r));
+                } else if (call.name === "compare_restaurants") {
+                    const list = el("div", "ranked");
+                    for (const r of data.ranked || []) {
+                        const row = el("div", "rank-row");
+                        const v = el("span", "verdict", r.verdict);
+                        v.style.background = VERDICT_COLORS[r.verdict] || "var(--muted)";
+                        const info = el("div");
+                        info.append(
+                            el("span", "", r.rank + ". " + r.name),
+                            el("small", "", [
+                                "hygiene " + (r.hygiene.grade || "?") + (r.hygiene.latest_violation_points != null ? " (" + r.hygiene.latest_violation_points + " pts)" : ""),
+                                r.google_rating ? "★ " + r.google_rating + " · adj " + r.adjusted_rating : "no rating",
+                                r.price && r.price !== "unknown" ? r.price : "$ ?",
+                                r.open_now === true ? "open now" : r.open_now === false ? "closed now" : "",
+                            ].filter(Boolean).join(" · ")),
+                        );
+                        row.append(gradeBox(r.hygiene.grade), info, v);
+                        list.append(row);
+                    }
+                    body.append(list, el("div", "note", "Ranked in code: verdict → review-adjusted rating → fewer violation points"));
+                    const notes = [...new Set((data.ranked || []).map((r) => r.ratings_note).filter(Boolean))];
+                    if (notes.length === 1 && (data.ranked || []).every((r) => r.ratings_note)) {
+                        body.append(el("div", "note warn", "⚠️ " + notes[0]));
+                    } else {
+                        for (const r of data.ranked || []) if (r.ratings_note) body.append(el("div", "note warn", "⚠️ " + r.name + ": " + r.ratings_note));
+                    }
+                } else if (call.name === "worth_it_check") {
+                    const t = data.taste || {}, pr = data.price || {}, h = data.hygiene || {};
+                    const row = el("div", "facts");
+                    const fact = (big, small) => { const f = el("div", "fact"); f.append(el("b", "", big), el("small", "", small)); return f; };
+                    const hy = el("div", "fact");
+                    hy.append(gradeBox(h.grade), el("small", "", "hygiene " + (h.band || "?")));
+                    row.append(
+                        hy,
+                        fact(t.google_rating ? "★ " + t.google_rating : "★ –", t.reviews ? t.reviews.toLocaleString() + " reviews · adj " + t.adjusted_rating : "no rating found"),
+                        fact(pr.level && pr.level !== "unknown" ? pr.level : "$ ?", pr.range || "price"),
+                    );
+                    const hrs = data.hours;
+                    if (hrs) {
+                        const open = hrs.open_now === true ? "🟢 Open now" : hrs.open_now === false ? "🔴 Closed now" : "🕒 Hours";
+                        const today = (hrs.today || "").replace(/^[A-Za-z]+:\s*/, "") || "unknown";
+                        row.append(fact(open, "Today: " + today));
+                    }
+                    const v = el("span", "verdict", data.verdict);
+                    v.style.background = VERDICT_COLORS[data.verdict] || "var(--muted)";
+                    row.append(v);
+                    body.append(el("div", "", data.restaurant ? data.restaurant.name : ""), row);
+                    for (const r of (h.reasons || []).slice(1)) body.append(el("div", "note", "• " + r));
+                    if (data.ratings_note) body.append(el("div", "note warn", "⚠️ " + data.ratings_note));
+                }
+                step.append(body);
+
+                const details = el("details");
+                details.append(el("summary", "", "raw result"));
+                details.append(el("pre", "", JSON.stringify(data, null, 2)));
+                step.append(details);
+                return step;
+            }
+
+            function addUser(text) {
+                document.getElementById("starter-chips")?.remove();
+                messages.append(el("div", "msg user", text));
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            async function send(textOverride) {
+                const text = (textOverride || userInput.value).trim();
+                if (!text || sendBtn.disabled) return;
+                userInput.value = "";
+                sendBtn.disabled = true;
+                addUser(text);
+
+                const bot = el("div", "msg bot loading");
+                const avatar = el("img", "avatar");
+                avatar.src = "/meowchi.jpg";
+                avatar.alt = "Meowchi";
+                const content = el("div", "content");
+                const log = el("div", "log");
+                const answer = el("div", "text");
+                answer.innerHTML = wrapEmoticons("Meowchi is sniffing through the city records… /ᐠ｡ꞈ｡ᐟ\\");
+                content.append(log, answer);
+                bot.append(avatar, content);
+                messages.append(bot);
+                messages.scrollTop = messages.scrollHeight;
+
+                try {
+                    const res = await fetch("/chat", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: text, session_id: sessionId }),
+                    });
+                    const data = await res.json();
+                    sessionId = data.session_id;
+                    for (const call of data.tool_calls || []) log.append(renderStep(call));
+                    answer.innerHTML = renderMarkdown(data.response);
+                } catch (e) {
+                    answer.textContent = "Error: " + e.message;
+                }
+                bot.classList.remove("loading");
+                messages.scrollTop = messages.scrollHeight;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+
+            sendBtn.addEventListener("click", () => send());
+            userInput.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+            document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => send(c.textContent)));
+            document.getElementById("new-chat").addEventListener("click", async () => {
+                if (sessionId) await fetch("/clear?session_id=" + encodeURIComponent(sessionId), { method: "POST" });
+                location.reload();
+            });
+            userInput.focus();
+        </script>
+    </body>
+</html>
