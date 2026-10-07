@@ -1,4 +1,4 @@
-# Eat or Not? 🍴🐀
+# Eat or Not? 🍴🐱
 
 **Ask Meowchi, a mochi-loving New Yorker cat, whether a NYC restaurant is worth eating at (˵◝ ⩊  ◜˵マ**
 
