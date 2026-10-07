@@ -28,6 +28,9 @@ the answer, so nothing is taken on faith.
 [Rodent Inspections](https://data.cityofnewyork.us/d/p937-wjvj); no key needed)
 and the [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service/text-search).
 
+Note: GitHub may occasionally return a 403 when opening the NYC Open Data links directly from the README. Copying the URL into a browser works normally.
+
+
 ## How to use it
 
 Open the app and type into the chat box, or tap one of the three example buttons under Meowchi's
@@ -144,7 +147,7 @@ submission.json deploy URL and authors
 Model: `vertex_ai/gemini-3.5-flash-lite` (location `global`) through LiteLLM.
 
 
-## Fun fact 🐾
+## Fun Fact 🐾
 
 I built this because I'm a big foodie. I also love cats and discovering the city. Here's my own Google Map full of places I've saved and now Meowchi can definitely check them before I go ٩(^ᗜ^ )و ´-
 
