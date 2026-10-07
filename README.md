@@ -147,7 +147,7 @@ submission.json deploy URL and authors
 Model: `vertex_ai/gemini-3.5-flash-lite` (location `global`) through LiteLLM.
 
 
-## Fun Fact 🐾
+## Fun fact 🐾
 
 I built this because I'm a big foodie. I also love cats and discovering the city. Here's my own Google Map full of places I've saved and now Meowchi can definitely check them before I go ٩(^ᗜ^ )و ´-
 
