@@ -23,10 +23,10 @@ the answer, so nothing is taken on faith.
 | `worth_it_check` ⭐ | Hygiene, Google rating (adjusted for review count), price and today's opening hours side by side, with a rule-based verdict. |
 | `compare_restaurants` ⭐ | Runs the worth-it check on 2–5 places and returns them already ranked in code (verdict → adjusted rating → fewer violation points), so the order never depends on the model's taste. |
 
-⭐ original tools. Data: NYC Open Data
-([Restaurant Inspections](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/about_data),
-[Rodent Inspections](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj/about_data); no key needed) and the
-[Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service/text-search).
+⭐ Original tools. Data: NYC Open Data
+([Restaurant Inspections](https://data.cityofnewyork.us/d/43nn-pn8j),
+[Rodent Inspections](https://data.cityofnewyork.us/d/p937-wjvj); no key needed)
+and the [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service/text-search).
 
 ## How to use it
 
